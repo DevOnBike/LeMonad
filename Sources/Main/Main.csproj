@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DebugType>embedded</DebugType>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <RootNamespace>DevOnBike.LeMonad</RootNamespace>
+    <AssemblyName>DevOnBike.LeMonad</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <SourceRevisionId>N/A</SourceRevisionId>
+    <InformationalVersion>$(Version)+$(SourceRevisionId)</InformationalVersion>
+    <PackageId>DevOnBike.LeMonad</PackageId>
+    <Version>8.0.0</Version>
+    <Authors>DevOnBike</Authors>
+    <Description>c# functional extensions powered by DevOnBike</Description>
+    <RepositoryUrl>https://github.com/DevOnBike/LeMonad</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>functional</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <InternalsVisibleTo Include="Tests" />
+  </ItemGroup>
+
+</Project>
+
