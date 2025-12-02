@@ -1,12 +1,14 @@
-﻿namespace DevOnBike.LeMonad.Tests
+﻿// Upewnij się, że ten namespace pasuje do Twojej struktury projektu w repozytorium LeMonad
+namespace DevOnBike.LeMonad.Tests
 {
     public class ResultTests
     {
+        // Pomocnicze rekordy do testów
         public record Val(int Id);
         public record Err(string Code);
 
         // =======================================================================
-        // 1. KONSTRUKCJA I WŁAŚCIWOŚCI (State & Properties)
+        // 1. STATE & PROPERTIES
         // =======================================================================
 
         [Fact]
@@ -46,7 +48,7 @@
         }
 
         // =======================================================================
-        // 2. OCHRONA STANU (Guard Clauses / Exceptions)
+        // 2. GUARD CLAUSES / EXCEPTIONS (UPDATED TO ENGLISH MESSAGES)
         // =======================================================================
 
         [Fact]
@@ -56,7 +58,8 @@
 
             var ex = Assert.Throws<InvalidOperationException>(() => result.Value);
 
-            Assert.Contains("Nie można pobrać wartości z błędnego wyniku", ex.Message);
+            // FIX: Updated to match English message in Result.cs
+            Assert.Contains("Cannot access the Value of a Failure result", ex.Message);
         }
 
         [Fact]
@@ -66,33 +69,31 @@
 
             var ex = Assert.Throws<InvalidOperationException>(() => result.Error);
 
-            Assert.Contains("Nie można pobrać błędu z sukcesu", ex.Message);
+            // FIX: Updated to match English message in Result.cs
+            Assert.Contains("Cannot access the Error of a Success result", ex.Message);
         }
 
         [Fact]
         public void Accessing_Error_On_Default_Struct_Throws_InvalidOperationException()
         {
-            // EDGE CASE: default(struct) ma IsSuccess = false, ale _error = null.
-            // Kod w Result.cs ma zabezpieczenie: _error is not null ? ... : throw
-
             Result<Val, Err> result = default;
 
             Assert.False(result.IsSuccess);
 
             var ex = Assert.Throws<InvalidOperationException>(() => result.Error);
 
-            Assert.Contains("Result jest w stanie 'default'", ex.Message);
+            // FIX: Updated to match English message in Result.cs
+            Assert.Contains("Result is in a 'default' state", ex.Message);
         }
 
         // =======================================================================
-        // 3. METODY FUNKCYJNE (Core Logic)
+        // 3. FUNCTIONAL CORE METHODS
         // =======================================================================
 
         [Fact]
         public void Match_Executes_OnSuccess_When_Success()
         {
             Result<int, string> result = 10;
-
             var output = result.Match(
                 onSuccess: v => v * 2,
                 onFailure: e => -1
@@ -104,12 +105,10 @@
         public void Match_Executes_OnFailure_When_Failure()
         {
             Result<int, string> result = "error";
-
             var output = result.Match(
                 onSuccess: v => "Success",
                 onFailure: e => $"Failed: {e}"
             );
-
             Assert.Equal("Failed: error", output);
         }
 
@@ -146,7 +145,7 @@
         }
 
         // =======================================================================
-        // 4. MAPOWANIE I BINDING (Map, MapError, Bind)
+        // 4. MAP & BIND
         // =======================================================================
 
         [Fact]
@@ -194,7 +193,6 @@
         {
             Result<int, string> result = 10;
 
-            // Binder zwraca sukces
             var bound = result.Bind(x => Result<string, string>.Success($"Val: {x}"));
 
             Assert.True(bound.IsSuccess);
@@ -206,7 +204,6 @@
         {
             Result<int, string> result = 10;
 
-            // Binder zwraca porażkę
             var bound = result.Bind(x => Result<string, string>.Failure("New Error"));
 
             Assert.False(bound.IsSuccess);
@@ -231,14 +228,14 @@
         }
 
         // =======================================================================
-        // 5. LINQ QUERY SYNTAX (Select, SelectMany)
+        // 5. LINQ QUERY SYNTAX
         // =======================================================================
 
         [Fact]
         public void Select_Works_Like_Map()
         {
             Result<int, string> result = 10;
-            var selected = result.Select(x => x * 2); // LINQ method syntax
+            var selected = result.Select(x => x * 2);
 
             Assert.True(selected.IsSuccess);
             Assert.Equal(20, selected.Value);
@@ -247,7 +244,6 @@
         [Fact]
         public void SelectMany_Happy_Path()
         {
-            // Scenario: from a in res1 from b in res2 select a + b
             Result<int, string> r1 = 10;
             Result<int, string> r2 = 20;
 
@@ -263,7 +259,6 @@
         [Fact]
         public void SelectMany_Fails_When_First_Result_Is_Failure()
         {
-            // Scenario: Pierwszy element jest błędem -> Binder i Projector nie powinny ruszyć
             Result<int, string> r1 = "Error 1";
 
             bool binderCalled = false;
@@ -281,14 +276,13 @@
         [Fact]
         public void SelectMany_Fails_When_Binder_Returns_Failure()
         {
-            // Scenario: Pierwszy OK, ale Binder zwraca błąd -> Projector nie powinien ruszyć
             Result<int, string> r1 = 10;
             Result<int, string> r2 = "Error 2";
 
             bool projectorCalled = false;
 
             var query = r1.SelectMany(
-                binder: x => r2, // Tu zwracamy błąd
+                binder: x => r2,
                 projector: (x, y) => { projectorCalled = true; return x + y; }
             );
 
