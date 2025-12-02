@@ -2,8 +2,12 @@
 {
     public static class ResultExtensions
     {
+        // =======================================================================
+        // 1. ASYNC BRIDGES (Bridges for Task<Result>)
+        // =======================================================================
+
         /// <summary>
-        /// Asynchroniczny Map: Czeka na Task, a potem wykonuje Map na wyniku.
+        /// Asynchronous Map: Awaits the Task, then executes Map on the result.
         /// </summary>
         public static async Task<Result<U, TError>> MapAsync<T, U, TError>(
             this Task<Result<T, TError>> resultTask,
@@ -24,7 +28,7 @@
         }
 
         /// <summary>
-        /// Asynchroniczny Map przyjmujący Token.
+        /// Asynchronous Map accepting a Token.
         /// </summary>
         public static async Task<Result<U, TError>> MapAsync<T, U, TError>(
             this Task<Result<T, TError>> resultTask,
@@ -38,14 +42,14 @@
                 return Result<U, TError>.Failure(result.Error);
             }
 
-            // Usunięto explicit ThrowIfCancellationRequested
+            // Removed explicit ThrowIfCancellationRequested
             var newValue = await mapper(result.Value, token).ConfigureAwait(false);
 
             return Result<U, TError>.Success(newValue);
         }
 
         /// <summary>
-        /// Konsumuje Result (Unit). Wersja Synchroniczna.
+        /// Consumes the Result (Unit). Synchronous Version.
         /// </summary>
         public static async Task HandleFailureAsync<TError>(
             this Task<Result<Unit, TError>> resultTask,
@@ -61,7 +65,7 @@
         }
 
         /// <summary>
-        /// Konsumuje Result (Unit). Wersja Asynchroniczna z Tokenem.
+        /// Consumes the Result (Unit). Asynchronous Version with Token.
         /// </summary>
         public static async Task HandleFailureAsync<TError>(
             this Task<Result<Unit, TError>> resultTask,
@@ -77,7 +81,7 @@
         }
 
         /// <summary>
-        /// BindAsync propagujący token.
+        /// BindAsync propagating the token.
         /// </summary>
         public static async Task<Result<U, TError>> BindAsync<T, U, TError>(
             this Task<Result<T, TError>> resultTask,
@@ -91,12 +95,12 @@
                 return Result<U, TError>.Failure(result.Error);
             }
 
-            // Usunięto explicit ThrowIfCancellationRequested
+            // Removed explicit ThrowIfCancellationRequested
             return await binder(result.Value, token).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Wersja Bind, gdzie funkcja wiążąca jest synchroniczna.
+        /// Bind version where the binding function is synchronous.
         /// </summary>
         public static async Task<Result<U, TError>> BindAsync<T, U, TError>(
             this Task<Result<T, TError>> resultTask,
@@ -139,7 +143,7 @@
         }
 
         /// <summary>
-        /// Asynchroniczny Tap z Tokenem (np. logowanie do bazy).
+        /// Asynchronous Tap with Token (e.g., logging to a database).
         /// </summary>
         public static async Task<Result<T, TError>> TapAsync<T, TError>(
             this Task<Result<T, TError>> resultTask,
@@ -150,7 +154,7 @@
 
             if (result.IsSuccess)
             {
-                // Usunięto explicit ThrowIfCancellationRequested
+                // Removed explicit ThrowIfCancellationRequested
                 await action(result.Value, token).ConfigureAwait(false);
             }
 
@@ -216,7 +220,7 @@
         }
 
         /// <summary>
-        /// ROZRUCH POTOKU (Sync Mapper): Task<T> -> Result<U>
+        /// PIPELINE START (Sync Mapper): Task<T> -> Result<U>
         /// </summary>
         public static async Task<Result<U, TError>> ToResultAsync<T, U, TError>(
             this Task<T> task,
@@ -228,7 +232,7 @@
         }
 
         /// <summary>
-        /// ROZRUCH POTOKU (Async Mapper z Tokenem).
+        /// PIPELINE START (Async Mapper with Token).
         /// </summary>
         public static async Task<Result<U, TError>> ToResultAsync<T, U, TError>(
             this Task<T> task,
@@ -236,7 +240,7 @@
             CancellationToken token)
         {
             var input = await task.WaitAsync(token).ConfigureAwait(false);
-            // Usunięto explicit ThrowIfCancellationRequested
+            // Removed explicit ThrowIfCancellationRequested
             return await mapper(input, token).ConfigureAwait(false);
         }
     }
